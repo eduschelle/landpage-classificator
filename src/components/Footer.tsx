@@ -12,7 +12,8 @@ export function Footer() {
         <p className="max-w-3xl leading-relaxed">{t.footer.disclaimer}</p>
         <p>{t.footer.jev}</p>
         <p>
-          © {new Date().getFullYear()} {site.legalName} · CNPJ {site.cnpj} · {site.city} · {t.footer.rights}
+          © {new Date().getFullYear()} {site.legalName || site.brand}
+          {site.cnpj && ` · CNPJ ${site.cnpj}`} · {site.city} · {t.footer.rights}
         </p>
         <p>
           <a href={`mailto:${site.email}`} className="text-ink-2 hover:text-ink">

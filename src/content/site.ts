@@ -1,17 +1,18 @@
 // Single source of truth for brand and legal data.
-// Replace the placeholders once the company is incorporated (CNPJ).
+// `legalName` and `cnpj` stay empty until the company is incorporated — Footer.tsx
+// falls back to `brand` and drops the CNPJ segment while they are empty strings.
 export const site = {
   brand: "EngSchelle",
   url: "https://engschelle.online",
-  legalName: "[Razão social — pending incorporation]",
-  cnpj: "[CNPJ — pending]",
+  legalName: "",
+  cnpj: "",
   city: "Brazil",
   email: "schelle.eng@gmail.com",
   founder: {
-    name: "[Founder name]",
+    name: "Eduardo Schelle",
     role: { en: "Founder & Lead Developer", pt: "Fundador e Desenvolvedor Principal" },
     linkedin: "",
-    github: "",
+    github: "https://github.com/eduschelle",
   },
   jev: {
     name: "Jev",

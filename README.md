@@ -11,7 +11,7 @@ Static landing page for an asset classifier (B3 stocks, FIIs, fixed income and f
 ## Project layout
 
 ```
-src/content/site.ts      brand, legal name/CNPJ placeholders, email, founder
+src/content/site.ts      brand, legal name/CNPJ (empty until incorporation), email, founder
 src/content/i18n.ts      EN/PT dictionaries for every section
 src/app/                 layout (SEO metadata), page, globals.css, icon.svg, opengraph-image.tsx
 src/components/          one component per section + LocaleProvider/LanguageToggle
@@ -21,6 +21,9 @@ public/                  robots.txt, sitemap.xml, _headers (Cloudflare headers)
 ```
 
 To change the brand, legal name, CNPJ or founder info, edit **`src/content/site.ts`** only.
+`legalName` and `cnpj` are empty strings while incorporation is pending; `Footer.tsx` falls back to
+`brand` and omits the `· CNPJ …` segment, so nothing placeholder-looking is ever rendered. Filling
+them in is all that is needed once the CNPJ exists.
 
 ## Setup (WSL2 + nvm)
 
@@ -64,12 +67,22 @@ The repo includes `wrangler.jsonc`, so Cloudflare deploys it as a Worker with St
 
 1. Cloudflare dashboard → **Workers & Pages → Create → Import a repository** → pick this repo.
 2. The Worker name **must match** `"name"` in `wrangler.jsonc` (`landpage-classificator`). Rename one of them if they differ.
-3. Build settings:
-   - Build command: *(leave empty)* — `wrangler deploy` runs `npm run build` itself (see `build` in `wrangler.jsonc`)
+3. Build settings (**Settings → Build → Build configuration**):
+   - Build command: *(must stay empty)* — `wrangler deploy` already runs `npm run build` itself (see `build` in
+     `wrangler.jsonc`). If the dashboard field is also set, every deploy runs `next build` **twice**; the tell is two
+     `next build` runs in the Workers Builds log.
    - Deploy command: `npx wrangler deploy`
    - Build variable `NODE_VERSION` = `22`
 4. **Settings → Variables and Secrets** → add `RESEND_API_KEY` (type *Secret*). Optionally `CONTACT_TO` / `CONTACT_FROM`.
-5. **Settings → Domains & Routes → Add → Custom domain** → `engschelle.online` (and `www.engschelle.online` if you want). The domain's DNS must be on Cloudflare: add the site in Cloudflare and switch the nameservers at your registrar to the two Cloudflare gives you. HTTPS is issued automatically.
+5. **Settings → Domains & Routes → Add → Custom domain** → `engschelle.online`, then again for `www.engschelle.online`.
+   Cloudflare creates the DNS records and issues the TLS certificate automatically.
+
+   This only works once the zone is **Active** in Cloudflare — the domain has to use Cloudflare's nameservers, not the
+   registrar's. `engschelle.online` is registered at GoDaddy, so: Cloudflare → **Add a site** → `engschelle.online`
+   (Free plan) → copy the two nameservers it assigns → GoDaddy → **My Products → Domains → engschelle.online → DNS →
+   Nameservers → Change → I'll use my own** → enter both. Propagation is usually minutes, up to 24h. Check with
+   `nslookup -type=ns engschelle.online` (expect `*.ns.cloudflare.com`) and `curl -I https://engschelle.online`
+   (expect `200` and `server: cloudflare`).
 
 You can also deploy from the CLI: `npx wrangler login` then `npm run deploy`.
 
@@ -88,12 +101,14 @@ You can also deploy from the CLI: `npx wrangler login` then `npm run deploy`.
 
 - [x] Functional website with a clear product and mission description
 - [x] Team section with at least one developer
-- [x] Working contact form
+- [x] Working contact form (needs `RESEND_API_KEY` set as a Worker secret **and a redeploy**, or `/api/contact` answers `not_configured`)
 - [x] No crypto/blockchain content (crypto association makes the company ineligible)
 - [x] Investment disclaimer (not investment advice, CVM)
-- [ ] Site live on HTTPS at engschelle.online
+- [x] Founder named with a public profile link (`founder` in `src/content/site.ts`)
+- [ ] Site live on HTTPS at engschelle.online (needs the nameserver switch + custom domain above)
 - [ ] Company incorporated (CNPJ): fill `legalName` / `cnpj` in `src/content/site.ts`
-- [ ] Replace `[Founder name]` and add LinkedIn/GitHub in `src/content/site.ts`
+
+The CNPJ is the only remaining hard blocker — the application cannot be submitted without incorporation.
 
 ## Notes
 
