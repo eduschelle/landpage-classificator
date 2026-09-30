@@ -5,7 +5,8 @@ Static landing page for an asset classifier (B3 stocks, FIIs, fixed income and f
 - **Next.js 16** with `output: "export"` → fully static site in `out/`
 - **Tailwind CSS v4** + TypeScript
 - **Bilingual** EN (default) / PT-BR, switched client-side (`localStorage`); all copy lives in `src/content/i18n.ts`
-- **Contact form** → Cloudflare Pages Function `functions/api/contact.ts` → Resend REST API → schelle.eng@gmail.com
+- **Contact form** → Cloudflare Worker `worker/index.ts` (`/api/contact`) → Resend REST API → schelle.eng@gmail.com
+- **Hosting**: Cloudflare Workers with Static Assets (`wrangler.jsonc`) — the Worker only runs for `/api/*`, everything else is served straight from `out/`
 
 ## Project layout
 
@@ -14,7 +15,8 @@ src/content/site.ts      brand, legal name/CNPJ placeholders, email, founder
 src/content/i18n.ts      EN/PT dictionaries for every section
 src/app/                 layout (SEO metadata), page, globals.css, icon.svg, opengraph-image.tsx
 src/components/          one component per section + LocaleProvider/LanguageToggle
-functions/api/contact.ts Cloudflare Pages Function (the only server-side code)
+worker/index.ts          Cloudflare Worker: /api/contact (the only server-side code), falls back to static assets
+wrangler.jsonc           Worker config: assets dir out/, build command, worker name
 public/                  robots.txt, sitemap.xml, _headers (Cloudflare headers)
 ```
 
@@ -32,21 +34,21 @@ npm install
 ## Development
 
 ```bash
-npm run dev        # http://localhost:3000 (the /api/contact function is NOT available here)
+npm run dev        # http://localhost:3000 (/api/contact is NOT available here)
 npm run lint
 npm run build      # static export → out/
 ```
 
-To test the site **and** the contact function together, use Wrangler:
+To test the site **and** the contact endpoint together, use Wrangler:
 
 ```bash
 cp .dev.vars.example .dev.vars   # put your real RESEND_API_KEY in it (never commit .dev.vars)
-npm run preview                  # build + wrangler pages dev out → http://localhost:8788
+npm run preview                  # wrangler dev: builds, then serves out/ + the Worker → http://localhost:8787
 ```
 
 Submit the form at `/#contact`, and the email should arrive at schelle.eng@gmail.com.
 
-## Environment variables (Pages Function)
+## Environment variables (Worker)
 
 | Name             | Required | Default                  | Notes                                             |
 |------------------|----------|--------------------------|---------------------------------------------------|
@@ -56,21 +58,20 @@ Submit the form at `/#contact`, and the email should arrive at schelle.eng@gmail
 
 > With the default `onboarding@resend.dev` sender, Resend only delivers to the email address of the Resend account owner. Sign up for Resend with schelle.eng@gmail.com, or verify the domain (below).
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare (Workers)
 
-1. Push this repo to GitHub.
-2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git** → pick the repo.
+The repo includes `wrangler.jsonc`, so Cloudflare deploys it as a Worker with Static Assets. Without that file, Cloudflare auto-detects Next.js and tries OpenNext, which does not support `output: "export"`.
+
+1. Cloudflare dashboard → **Workers & Pages → Create → Import a repository** → pick this repo.
+2. The Worker name **must match** `"name"` in `wrangler.jsonc` (`landpage-classificator`). Rename one of them if they differ.
 3. Build settings:
-   - Framework preset: *None* (or Next.js (Static HTML Export))
-   - Build command: `npm run build`
-   - Build output directory: `out`
-   - Environment variable `NODE_VERSION` = `22` (it also reads `.nvmrc`)
-4. **Settings → Variables and Secrets** → add `RESEND_API_KEY` (type *Secret*) for Production (and Preview if you want).
-   Redeploy after adding variables.
-5. The `functions/` directory is picked up automatically and `/api/contact` becomes a Pages Function.
-6. **Custom domains** → add `engschelle.online` (and `www.engschelle.online` if you want). If the domain's DNS is on Cloudflare, the records are created automatically; otherwise point the nameservers to Cloudflare first. HTTPS is issued automatically.
+   - Build command: *(leave empty)* — `wrangler deploy` runs `npm run build` itself (see `build` in `wrangler.jsonc`)
+   - Deploy command: `npx wrangler deploy`
+   - Build variable `NODE_VERSION` = `22`
+4. **Settings → Variables and Secrets** → add `RESEND_API_KEY` (type *Secret*). Optionally `CONTACT_TO` / `CONTACT_FROM`.
+5. **Settings → Domains & Routes → Add → Custom domain** → `engschelle.online` (and `www.engschelle.online` if you want). The domain's DNS must be on Cloudflare: add the site in Cloudflare and switch the nameservers at your registrar to the two Cloudflare gives you. HTTPS is issued automatically.
 
-You can also deploy from the CLI: `npx wrangler login` then `npm run deploy`. That creates or uses the Pages project `engschelle`. Rename it in `package.json` if you prefer another name.
+You can also deploy from the CLI: `npx wrangler login` then `npm run deploy`.
 
 ### Resend domain verification (sender @engschelle.online)
 
@@ -81,7 +82,7 @@ You can also deploy from the CLI: `npx wrangler login` then `npm run deploy`. Th
    - `TXT` on `send` → `v=spf1 include:amazonses.com ~all`
    - Optional: `TXT` on `_dmarc` → `v=DMARC1; p=none;`
 3. Click **Verify** and wait until the status is *Verified*.
-4. Set `CONTACT_FROM=contact@engschelle.online` in Cloudflare Pages and redeploy.
+4. Set `CONTACT_FROM=contact@engschelle.online` in the Worker's variables and redeploy.
 
 ## NVIDIA Inception checklist
 
@@ -97,4 +98,5 @@ You can also deploy from the CLI: `npx wrangler login` then `npm run deploy`. Th
 ## Notes
 
 - Signal demo and token figures are **illustrative** and labeled as such on the page.
-- `opengraph-image` is generated at build time; `public/_headers` makes Cloudflare serve it as `image/png`.
+- `opengraph-image` is generated at build time; `public/_headers` makes Cloudflare serve it as `image/png` (Workers Static Assets honors `_headers`).
+- Building on Windows can fail if Smart App Control blocks Next's native SWC binary (`An Application Control policy has blocked this file`). Build in WSL with a Linux Node (`nvm install`) instead.

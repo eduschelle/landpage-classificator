@@ -1,20 +1,19 @@
-// Cloudflare Pages Function: POST /api/contact
-// Validates the contact form and forwards it by email through the Resend REST API.
+// Cloudflare Worker: serves the static export in out/ and handles POST /api/contact.
+// Static files are served directly by Workers Static Assets; this script only runs for /api/*
+// (see run_worker_first in wrangler.jsonc).
 //
-// Environment variables (Cloudflare Pages → Settings → Variables, or .dev.vars locally):
+// /api/contact validates the contact form and forwards it by email through the Resend REST API.
+//
+// Environment variables (Cloudflare → Worker → Settings → Variables and Secrets, or .dev.vars locally):
 //   RESEND_API_KEY  (required, secret)
 //   CONTACT_TO      (optional, default schelle.eng@gmail.com)
 //   CONTACT_FROM    (optional, default onboarding@resend.dev until the domain is verified)
 
 interface Env {
+  ASSETS: { fetch(request: Request): Promise<Response> };
   RESEND_API_KEY?: string;
   CONTACT_TO?: string;
   CONTACT_FROM?: string;
-}
-
-interface Context {
-  request: Request;
-  env: Env;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,7 +27,7 @@ const json = (body: unknown, status = 200) =>
 const field = (data: Record<string, unknown>, key: string) =>
   typeof data[key] === "string" ? (data[key] as string).trim() : "";
 
-export async function onRequestPost({ request, env }: Context): Promise<Response> {
+async function handleContact(request: Request, env: Env): Promise<Response> {
   // Only accept submissions from our own pages.
   const origin = request.headers.get("Origin");
   if (origin && new URL(origin).host !== new URL(request.url).host) {
@@ -82,6 +81,17 @@ export async function onRequestPost({ request, env }: Context): Promise<Response
   return json({ ok: true });
 }
 
-export function onRequest(): Response {
-  return json({ error: "method_not_allowed" }, 405);
-}
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const { pathname } = new URL(request.url);
+
+    if (pathname === "/api/contact") {
+      return request.method === "POST" ? handleContact(request, env) : json({ error: "method_not_allowed" }, 405);
+    }
+    if (pathname.startsWith("/api/")) {
+      return json({ error: "not_found" }, 404);
+    }
+
+    return env.ASSETS.fetch(request);
+  },
+};

@@ -1,0 +1,22 @@
+// Cloudflare Workers config. Having this file stops Cloudflare from auto-configuring
+// OpenNext, which does not support Next.js static export (output: "export").
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Must match the Worker name in the Cloudflare dashboard, or Workers Builds will fail.
+  "name": "landpage-classificator",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  // `wrangler deploy` / `wrangler dev` run the Next.js static export first.
+  "build": {
+    "command": "npm run build"
+  },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": {
+    "enabled": true
+  }
+}
