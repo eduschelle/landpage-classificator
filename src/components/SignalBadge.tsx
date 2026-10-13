@@ -4,11 +4,9 @@ import type { SignalKey } from "@/content/i18n";
 import { useLocale } from "./LocaleProvider";
 
 const styles: Record<SignalKey, { color: string; icon: string }> = {
-  strongBuy: { color: "var(--sig-strong-buy)", icon: "▲▲" },
-  buy: { color: "var(--sig-buy)", icon: "▲" },
-  hold: { color: "var(--sig-hold)", icon: "●" },
-  sell: { color: "var(--sig-sell)", icon: "▼" },
-  strongSell: { color: "var(--sig-strong-sell)", icon: "▼▼" },
+  strong: { color: "var(--sig-strong)", icon: "▲" },
+  neutral: { color: "var(--sig-neutral)", icon: "●" },
+  weak: { color: "var(--sig-weak)", icon: "▼" },
 };
 
 // Identity is carried by label + icon; the colored swatch is secondary, and text stays in ink.

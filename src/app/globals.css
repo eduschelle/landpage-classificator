@@ -13,12 +13,10 @@
   --border: rgba(255, 255, 255, 0.1);
   --accent: #3987e5;
 
-  /* Signal scale — diverging blue ↔ red with a neutral midpoint (validated on dark). */
-  --sig-strong-buy: #4f94e2;
-  --sig-buy: #2064b5;
-  --sig-hold: #898781;
-  --sig-sell: #ad3d3d;
-  --sig-strong-sell: #e66767;
+  /* Signal scale — Strong (blue) ↔ Weak (red) with a neutral midpoint (validated on dark). */
+  --sig-strong: #4f94e2;
+  --sig-neutral: #898781;
+  --sig-weak: #e66767;
 }
 
 @theme inline {

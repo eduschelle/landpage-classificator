@@ -1,6 +1,6 @@
 # EngSchelle — landing page (engschelle.online)
 
-Static landing page for an asset classifier (B3 stocks, FIIs, fixed income and funds) that emits discrete signals — Strong Buy, Buy, Hold, Sell, Strong Sell — using embeddings from the Jev model (TypeSafe AI) instead of LLM-generated text analysis.
+Static landing page for a rule-based classifier for B3 (Brazilian) stocks: it scores real fundamentals from Fundamentus across four pillars (valuation, profitability, solidity, dividends) into a 0–100 score and three discrete signals — Strong, Neutral, Weak — on a local data pipeline that mirrors an AWS stack (Airflow / Spark / MinIO / Hive / Trino), with Claude (Anthropic) screening news to add caution to a signal.
 
 - **Next.js 16** with `output: "export"` → fully static site in `out/`
 - **Tailwind CSS v4** + TypeScript

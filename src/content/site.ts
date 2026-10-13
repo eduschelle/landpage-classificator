@@ -14,11 +14,6 @@ export const site = {
     linkedin: "",
     github: "https://github.com/eduschelle",
   },
-  jev: {
-    name: "Jev",
-    vendor: "TypeSafe AI",
-    url: "",
-  },
 } as const;
 
 export type Site = typeof site;

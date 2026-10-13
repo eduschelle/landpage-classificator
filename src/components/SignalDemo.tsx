@@ -5,23 +5,22 @@ import { Section } from "./Section";
 import { SignalBadge } from "./SignalBadge";
 import { useLocale } from "./LocaleProvider";
 
-type AssetType = "stock" | "fii" | "fixed" | "fund";
-
-// Illustrative sample only — not model output, not a recommendation.
-const rows: { asset: string; type: AssetType; signal: SignalKey; confidence: number }[] = [
-  { asset: "WEGE3", type: "stock", signal: "buy", confidence: 0.71 },
-  { asset: "ITUB4", type: "stock", signal: "hold", confidence: 0.64 },
-  { asset: "PETR4", type: "stock", signal: "sell", confidence: 0.58 },
-  { asset: "HGLG11", type: "fii", signal: "strongBuy", confidence: 0.82 },
-  { asset: "MXRF11", type: "fii", signal: "hold", confidence: 0.6 },
-  { asset: "Tesouro IPCA+ 2035", type: "fixed", signal: "buy", confidence: 0.77 },
-  { asset: "CDB 100% CDI", type: "fixed", signal: "hold", confidence: 0.69 },
-  { asset: "Multimercado XYZ", type: "fund", signal: "strongSell", confidence: 0.66 },
+// Snapshot from a recent run on public fundamentals — not real-time, not a recommendation.
+const rows: { asset: string; grade: string; score: number; signal: SignalKey }[] = [
+  { asset: "PETR4", grade: "B", score: 77.8, signal: "strong" },
+  { asset: "VALE3", grade: "B", score: 68.8, signal: "strong" },
+  { asset: "ITUB4", grade: "B", score: 65.8, signal: "neutral" },
+  { asset: "SMTO3", grade: "C", score: 54.6, signal: "neutral" },
+  { asset: "WEGE3", grade: "C", score: 55.5, signal: "weak" },
+  { asset: "MGLU3", grade: "D", score: 40.2, signal: "weak" },
 ];
 
 export function SignalDemo() {
   const { t, locale } = useLocale();
-  const pct = new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US", { style: "percent" });
+  const nf = new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
 
   return (
     <Section id="demo" title={t.demo.title} intro={t.demo.intro}>
@@ -31,18 +30,18 @@ export function SignalDemo() {
           <thead className="border-b border-border text-xs tracking-wide text-muted uppercase">
             <tr>
               <th scope="col" className="px-6 py-4 font-medium">{t.demo.columns.asset}</th>
-              <th scope="col" className="px-6 py-4 font-medium">{t.demo.columns.type}</th>
+              <th scope="col" className="px-6 py-4 font-medium">{t.demo.columns.grade}</th>
+              <th scope="col" className="px-6 py-4 text-right font-medium">{t.demo.columns.score}</th>
               <th scope="col" className="px-6 py-4 font-medium">{t.demo.columns.signal}</th>
-              <th scope="col" className="px-6 py-4 text-right font-medium">{t.demo.columns.confidence}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.asset} className="border-b border-grid last:border-0">
                 <th scope="row" className="px-6 py-4 font-semibold">{r.asset}</th>
-                <td className="px-6 py-4 text-ink-2">{t.demo.types[r.type]}</td>
+                <td className="px-6 py-4 text-ink-2 tabular-nums">{r.grade}</td>
+                <td className="px-6 py-4 text-right text-ink-2 tabular-nums">{nf.format(r.score)}</td>
                 <td className="px-6 py-4"><SignalBadge signal={r.signal} /></td>
-                <td className="px-6 py-4 text-right text-ink-2 tabular-nums">{pct.format(r.confidence)}</td>
               </tr>
             ))}
           </tbody>

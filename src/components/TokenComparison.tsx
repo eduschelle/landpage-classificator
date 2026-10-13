@@ -5,7 +5,7 @@ import { useLocale } from "./LocaleProvider";
 
 // Illustrative estimates — see the footnote in i18n.ts.
 const LLM_TOKENS = 6000;
-const JEV_TOKENS = 500;
+const SYSTEM_TOKENS = 250;
 const MAX = 6000;
 const TICKS = [0, 2000, 4000, 6000];
 // Leave room past the longest bar for its value label.
@@ -16,9 +16,9 @@ export function TokenComparison() {
   const nf = new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US");
   const bars = [
     { label: t.tokens.llm, value: LLM_TOKENS, color: "#6b6a65" },
-    { label: t.tokens.jev, value: JEV_TOKENS, color: "var(--accent)" },
+    { label: t.tokens.system, value: SYSTEM_TOKENS, color: "var(--accent)" },
   ];
-  const ratio = Math.round(LLM_TOKENS / JEV_TOKENS);
+  const ratio = Math.round(LLM_TOKENS / SYSTEM_TOKENS);
 
   return (
     <Section title={t.tokens.title} intro={t.tokens.intro}>
@@ -26,7 +26,7 @@ export function TokenComparison() {
         <p className="text-5xl font-semibold tracking-tight">
           {ratio}×
           <span className="ml-3 text-base font-normal tracking-normal text-ink-2">
-            {t.tokens.jev} vs. {t.tokens.llm}
+            {t.tokens.system} vs. {t.tokens.llm}
           </span>
         </p>
 
