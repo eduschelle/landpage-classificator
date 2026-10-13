@@ -10,7 +10,7 @@ export function Footer() {
     <footer className="border-t border-border py-12 text-sm text-muted">
       <div className="mx-auto grid max-w-6xl gap-4 px-6">
         <p className="max-w-3xl leading-relaxed">{t.footer.disclaimer}</p>
-        <p>{t.footer.jev}</p>
+        <p>{t.footer.attribution}</p>
         <p>
           © {new Date().getFullYear()} {site.legalName || site.brand}
           {site.cnpj && ` · CNPJ ${site.cnpj}`} · {site.city} · {t.footer.rights}

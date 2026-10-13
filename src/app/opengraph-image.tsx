@@ -8,11 +8,9 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const signals = [
-  ["Strong Buy", "#4f94e2"],
-  ["Buy", "#2064b5"],
-  ["Hold", "#898781"],
-  ["Sell", "#ad3d3d"],
-  ["Strong Sell", "#e66767"],
+  ["Strong", "#4f94e2"],
+  ["Neutral", "#898781"],
+  ["Weak", "#e66767"],
 ] as const;
 
 export default function Image() {

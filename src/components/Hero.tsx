@@ -4,7 +4,7 @@ import type { SignalKey } from "@/content/i18n";
 import { SignalBadge } from "./SignalBadge";
 import { useLocale } from "./LocaleProvider";
 
-const scale: SignalKey[] = ["strongBuy", "buy", "hold", "sell", "strongSell"];
+const scale: SignalKey[] = ["strong", "neutral", "weak"];
 
 export function Hero() {
   const { t } = useLocale();
